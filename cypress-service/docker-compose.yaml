@@ -12,7 +12,7 @@ services:
       - ./data/data-mongo-cypress:/data/db
     restart: always
     networks:
-      - reverse_proxy_network
+      - cypress_frontend_network
 
   director:
     image: agoldis/sorry-cypress-director:2.5.9
@@ -37,7 +37,7 @@ services:
       - mongo
     restart: always
     networks:
-      - reverse_proxy_network
+      - cypress_frontend_network
     volumes:
       - /etc/ssl/certs/demo.pem:/etc/ssl/certs/demo.pem
       - /usr/local/share/ca-certificates/demo.crt:/usr/local/share/ca-certificates/demo.crt
@@ -52,7 +52,7 @@ services:
       - mongo
     restart: always
     networks:
-      - reverse_proxy_network
+      - cypress_frontend_network
 
   dashboard:
     image: agoldis/sorry-cypress-dashboard:2.5.9
@@ -66,14 +66,14 @@ services:
       - api
     restart: always
     networks:
-      - reverse_proxy_network
+      - cypress_frontend_network
 
-  reverse_proxy:
+  cypress-frontend:
     image: nginx:1.23
-    container_name: reverse_proxy
-    hostname: reverse_proxy
+    container_name: cypress-frontend
+    hostname: cypress-frontend
     networks:
-      - reverse_proxy_network
+      - cypress_frontend_network
     ports:
       - "80:80"
       - "443:443"
@@ -91,5 +91,5 @@ services:
       - dashboard
 
 networks:
-  reverse_proxy_network:
+  cypress_frontend_network:
     driver: bridge

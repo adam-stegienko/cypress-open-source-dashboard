@@ -6,7 +6,7 @@ services:
   storage:
     image: minio/minio
     networks:
-      - reverse_proxy_network
+      - minio_frontend_network
     environment:
       MINIO_ROOT_USER: 'minio'
       MINIO_ROOT_PASSWORD: 'secretkey'
@@ -20,7 +20,7 @@ services:
     depends_on:
       - storage
     networks:
-      - reverse_proxy_network
+      - minio_frontend_network
     entrypoint: >
       /bin/sh -c "
       sleep 3;
@@ -32,12 +32,12 @@ services:
       exit 0;
       "
   
-  reverse_proxy:
+  minio-frontend:
     image: nginx:1.23
-    container_name: reverse_proxy
-    hostname: reverse_proxy
+    container_name: minio-frontend
+    hostname: minio-frontend
     networks:
-      - reverse_proxy_network
+      - minio_frontend_network
     ports:
       - "80:80"
       - "443:443"
@@ -52,5 +52,5 @@ services:
       - storage
 
 networks:
-  reverse_proxy_network:
+  minio_frontend_network:
     driver: bridge
