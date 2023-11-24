@@ -1,0 +1,56 @@
+version: '3.6'
+
+# minio.yaml
+
+services:
+  storage:
+    image: minio/minio
+    networks:
+      - reverse_proxy_network
+    environment:
+      MINIO_ROOT_USER: 'minio'
+      MINIO_ROOT_PASSWORD: 'secretkey'
+    volumes:
+      - ./data/data-minio-cypress:/data
+    command: minio server --console-address ":9090" /data
+    restart: always
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - storage
+    networks:
+      - reverse_proxy_network
+    entrypoint: >
+      /bin/sh -c "
+      sleep 3;
+      /usr/bin/mc config host add myminio http://storage:9000 minio 'secretkey';
+      /usr/bin/mc rm -r --dangerous --force myminio/demo;
+      /usr/bin/mc mb myminio/demo;
+      /usr/bin/mc anonymous set download myminio/demo;
+      /usr/bin/mc anonymous set public myminio/demo;
+      exit 0;
+      "
+  
+  reverse_proxy:
+    image: nginx:1.23
+    container_name: reverse_proxy
+    hostname: reverse_proxy
+    networks:
+      - reverse_proxy_network
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+    volumes:
+      - /etc/ssl/certs/records-cypress.crt:/etc/ssl/certs/records-cypress.crt
+      - /etc/ssl/private/records-cypress.key:/etc/ssl/private/records-cypress.key
+      - /etc/ssl/certs/bucket-cypress.crt:/etc/ssl/certs/bucket-cypress.crt
+      - /etc/ssl/private/bucket-cypress.key:/etc/ssl/private/bucket-cypress.key
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - storage
+
+networks:
+  reverse_proxy_network:
+    driver: bridge

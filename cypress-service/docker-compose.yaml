@@ -1,0 +1,95 @@
+version: '3.6'
+
+# cypress.yaml
+
+services:
+  mongo:
+    image: mongo:4.4
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: 'mongo'
+      MONGO_INITDB_ROOT_PASSWORD: 'mongopwd'
+    volumes:
+      - ./data/data-mongo-cypress:/data/db
+    restart: always
+    networks:
+      - reverse_proxy_network
+
+  director:
+    image: agoldis/sorry-cypress-director:2.5.9
+    environment:
+      DASHBOARD_URL: http://dashboard:80
+      EXECUTION_DRIVER: '../execution/mongo/driver'
+      MONGODB_URI: 'mongodb://mongo:mongopwd@mongo:27017'
+      MONGODB_DATABASE: 'sorry-cypress'
+
+      SCREENSHOTS_DRIVER: '../screenshots/minio.driver'
+      GITLAB_JOB_RETRIES: 'false'
+      MINIO_ACCESS_KEY: 'minio'
+      MINIO_SECRET_KEY: 'secretkey'
+      MINIO_ENDPOINT: 'minio.local'
+      MINIO_URL: 'https://minio.local'
+      MINIO_PORT: '443'
+      MINIO_USESSL: 'true'
+      MINIO_BUCKET: 'demo'
+      PROBE_LOGGER: "false"
+      NODE_EXTRA_CA_CERTS: '/etc/ssl/certs/demo.pem'
+    depends_on:
+      - mongo
+    restart: always
+    networks:
+      - reverse_proxy_network
+    volumes:
+      - /etc/ssl/certs/demo.pem:/etc/ssl/certs/demo.pem
+      - /usr/local/share/ca-certificates/demo.crt:/usr/local/share/ca-certificates/demo.crt
+    
+  api:
+    image: agoldis/sorry-cypress-api:2.5.9
+    environment:
+      MONGODB_URI: 'mongodb://mongo:mongopwd@mongo:27017'
+      MONGODB_DATABASE: 'sorry-cypress'
+      APOLLO_PLAYGROUND: 'false'
+    depends_on:
+      - mongo
+    restart: always
+    networks:
+      - reverse_proxy_network
+
+  dashboard:
+    image: agoldis/sorry-cypress-dashboard:2.5.9
+    environment:
+      GRAPHQL_SCHEMA_URL: api
+      GRAPHQL_CLIENT_CREDENTIALS: ''
+      PORT: 8080
+      CI_URL: ''
+    depends_on:
+      - mongo
+      - api
+    restart: always
+    networks:
+      - reverse_proxy_network
+
+  reverse_proxy:
+    image: nginx:1.23
+    container_name: reverse_proxy
+    hostname: reverse_proxy
+    networks:
+      - reverse_proxy_network
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+    volumes:
+      - /etc/ssl/certs/cypress.crt:/etc/ssl/certs/cypress.crt
+      - /etc/ssl/private/cypress.key:/etc/ssl/private/cypress.key
+      - /etc/ssl/certs/director-cypress.crt:/etc/ssl/certs/director-cypress.crt
+      - /etc/ssl/private/director-cypress.key:/etc/ssl/private/director-cypress.key
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - mongo
+      - api
+      - director
+      - dashboard
+
+networks:
+  reverse_proxy_network:
+    driver: bridge
