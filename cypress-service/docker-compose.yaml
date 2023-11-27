@@ -79,8 +79,8 @@ services:
       - "443:443"
     restart: always
     volumes:
-      - /etc/ssl/certs/cypress.crt:/etc/ssl/certs/cypress.crt
-      - /etc/ssl/private/cypress.key:/etc/ssl/private/cypress.key
+      - /etc/ssl/certs/dashboard-cypress.crt:/etc/ssl/certs/dashboard-cypress.crt
+      - /etc/ssl/private/dashboard-cypress.key:/etc/ssl/private/dashboard-cypress.key
       - /etc/ssl/certs/director-cypress.crt:/etc/ssl/certs/director-cypress.crt
       - /etc/ssl/private/director-cypress.key:/etc/ssl/private/director-cypress.key
       - ./nginx.conf:/etc/nginx/nginx.conf
