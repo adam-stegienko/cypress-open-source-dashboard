@@ -45,8 +45,8 @@ services:
     volumes:
       - ~/minio-service/records-cypress.crt:/etc/ssl/certs/records-cypress.crt
       - ~/minio-service/records-cypress.key:/etc/ssl/private/records-cypress.key
-      - ~/minio-service/bucket-cypress.crt:/etc/ssl/certs/bucket-cypress.crt
-      - ~/minio-service/bucket-cypress.key:/etc/ssl/private/bucket-cypress.key
+      - ~/minio-service/minio-cypress.crt:/etc/ssl/certs/minio-cypress.crt
+      - ~/minio-service/minio-cypress.key:/etc/ssl/private/minio-cypress.key
       - ~/minio-service/demo.crt:/usr/local/share/ca-certificates/demo.crt
       - ~/minio-service/demo.crt:/etc/ssl/certs/demo.crt
       - ~/minio-service/demo.pem:/etc/ssl/certs/demo.pem

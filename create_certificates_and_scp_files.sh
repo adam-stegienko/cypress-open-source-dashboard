@@ -1,10 +1,10 @@
 #!/bin/bash
 
-set -xe
+# set -xe
 
 # variables section
 ROOT_DIR=$(pwd)
-SERVICES_ARRAY=(dashboard director bucket records)
+SERVICES_ARRAY=(dashboard director minio records)
 SERVICES_BASENAME='cypress'
 CA_BASENAME='demo'
 COUNTRY='PL'
@@ -79,7 +79,7 @@ EOF
 if [ "$SERVICE" = "dashboard" ] || [ "$SERVICE" = "director" ]; then
     mv $SERVICE_KEY cypress-service/$SERVICE_KEY
     mv $SERVICE_CRT cypress-service/$SERVICE_CRT
-elif [ "$SERVICE" = "bucket" ] || [ "$SERVICE" = "records" ]; then
+elif [ "$SERVICE" = "minio" ] || [ "$SERVICE" = "records" ]; then
     mv $SERVICE_KEY minio-service/$SERVICE_KEY
     mv $SERVICE_CRT minio-service/$SERVICE_CRT
 fi
