@@ -15,9 +15,9 @@ services:
       - cypress_frontend_network
 
   director:
-    image: agoldis/sorry-cypress-director:2.5.9
+    image: agoldis/sorry-cypress-director:2.5.11
     environment:
-      DASHBOARD_URL: http://dashboard:80
+      DASHBOARD_URL: http://dashboard:8080
       EXECUTION_DRIVER: '../execution/mongo/driver'
       MONGODB_URI: 'mongodb://mongo:mongopwd@mongo:27017'
       MONGODB_DATABASE: 'sorry-cypress'
@@ -43,7 +43,7 @@ services:
       - /usr/local/share/ca-certificates/demo.crt:/usr/local/share/ca-certificates/demo.crt
     
   api:
-    image: agoldis/sorry-cypress-api:2.5.9
+    image: agoldis/sorry-cypress-api:2.5.11
     environment:
       MONGODB_URI: 'mongodb://mongo:mongopwd@mongo:27017'
       MONGODB_DATABASE: 'sorry-cypress'
@@ -55,7 +55,7 @@ services:
       - cypress_frontend_network
 
   dashboard:
-    image: agoldis/sorry-cypress-dashboard:2.5.9
+    image: agoldis/sorry-cypress-dashboard:2.5.11
     environment:
       GRAPHQL_SCHEMA_URL: api
       GRAPHQL_CLIENT_CREDENTIALS: ''
@@ -69,7 +69,7 @@ services:
       - cypress_frontend_network
 
   cypress-frontend:
-    image: nginx:1.23
+    image: nginx:1.25.3
     container_name: cypress-frontend
     hostname: cypress-frontend
     networks:
@@ -79,10 +79,13 @@ services:
       - "443:443"
     restart: always
     volumes:
-      - /etc/ssl/certs/dashboard-cypress.crt:/etc/ssl/certs/dashboard-cypress.crt
-      - /etc/ssl/private/dashboard-cypress.key:/etc/ssl/private/dashboard-cypress.key
-      - /etc/ssl/certs/director-cypress.crt:/etc/ssl/certs/director-cypress.crt
-      - /etc/ssl/private/director-cypress.key:/etc/ssl/private/director-cypress.key
+      - ~/cypress-service/dashboard-cypress.crt:/etc/ssl/certs/dashboard-cypress.crt
+      - ~/cypress-service/dashboard-cypress.key:/etc/ssl/private/dashboard-cypress.key
+      - ~/cypress-service/director-cypress.crt:/etc/ssl/certs/director-cypress.crt
+      - ~/cypress-service/director-cypress.key:/etc/ssl/private/director-cypress.key
+      - ~/cypress-service/demo.crt:/usr/local/share/ca-certificates/demo.crt
+      - ~/cypress-service/demo.crt:/etc/ssl/certs/demo.crt
+      - ~/cypress-service/demo.pem:/etc/ssl/certs/demo.pem
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - mongo
