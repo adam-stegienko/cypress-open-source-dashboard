@@ -1,0 +1,59 @@
+version: '3.6'
+
+# minio.yaml
+
+services:
+  storage:
+    image: minio/minio
+    networks:
+      - minio_frontend_network
+    environment:
+      MINIO_ROOT_USER: '$MINIO_ROOT_USER'
+      MINIO_ROOT_PASSWORD: '$MINIO_ROOT_PASSWORD'
+    volumes:
+      - ./data/data-minio-cypress:/data
+    command: minio server --console-address ":9090" /data
+    restart: always
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - storage
+    networks:
+      - minio_frontend_network
+    entrypoint: >
+      /bin/sh -c "
+      sleep 3;
+      /usr/bin/mc config host add myminio http://storage:9000 $MINIO_ROOT_USER '$MINIO_ROOT_PASSWORD';
+      /usr/bin/mc rm -r --dangerous --force myminio/$MINIO_BUCKET;
+      /usr/bin/mc mb myminio/$MINIO_BUCKET;
+      /usr/bin/mc anonymous set download myminio/$MINIO_BUCKET;
+      /usr/bin/mc anonymous set public myminio/$MINIO_BUCKET;
+      exit 0;
+      "
+  
+  minio-frontend:
+    image: nginx:1.25.3
+    container_name: minio-frontend
+    hostname: minio-frontend
+    networks:
+      - minio_frontend_network
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+    volumes:
+      - ~/minio-service/$RECORDS_CRT:/etc/ssl/certs/$RECORDS_CRT
+      - ~/minio-service/$RECORDS_KEY:/etc/ssl/private/$RECORDS_KEY
+      - ~/minio-service/$MINIO_CRT:/etc/ssl/certs/$MINIO_CRT
+      - ~/minio-service/$MINIO_KEY:/etc/ssl/private/$MINIO_KEY
+      - ~/minio-service/$CA_BASENAME.crt:/usr/local/share/ca-certificates/$CA_BASENAME.crt
+      - ~/minio-service/$CA_BASENAME.crt:/etc/ssl/certs/$CA_BASENAME.crt
+      - ~/minio-service/$CA_BASENAME.pem:/etc/ssl/certs/$CA_BASENAME.pem
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - storage
+
+networks:
+  minio_frontend_network:
+    driver: bridge

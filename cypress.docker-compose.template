@@ -6,8 +6,8 @@ services:
   mongo:
     image: mongo:4.4
     environment:
-      MONGO_INITDB_ROOT_USERNAME: 'mongo'
-      MONGO_INITDB_ROOT_PASSWORD: 'mongopwd'
+      MONGO_INITDB_ROOT_USERNAME: '$MONGO_INITDB_ROOT_USERNAME'
+      MONGO_INITDB_ROOT_PASSWORD: '$MONGO_INITDB_ROOT_PASSWORD'
     volumes:
       - ./data/data-mongo-cypress:/data/db
     restart: always
@@ -19,34 +19,34 @@ services:
     environment:
       DASHBOARD_URL: http://dashboard:8080
       EXECUTION_DRIVER: '../execution/mongo/driver'
-      MONGODB_URI: 'mongodb://mongo:mongopwd@mongo:27017'
-      MONGODB_DATABASE: 'sorry-cypress'
+      MONGODB_URI: 'mongodb://$MONGO_INITDB_ROOT_USERNAME:$MONGO_INITDB_ROOT_PASSWORD@mongo:27017'
+      MONGODB_DATABASE: '$MONGODB_DATABASE'
 
       SCREENSHOTS_DRIVER: '../screenshots/minio.driver'
       GITLAB_JOB_RETRIES: 'false'
-      MINIO_ACCESS_KEY: 'minio'
-      MINIO_SECRET_KEY: 'secretkey'
-      MINIO_ENDPOINT: 'minio.local'
-      MINIO_URL: 'https://minio.local'
+      MINIO_ACCESS_KEY: '$MINIO_ACCESS_KEY'
+      MINIO_SECRET_KEY: '$MINIO_SECRET_KEY'
+      MINIO_ENDPOINT: '$MINIO_SERVICE_DOMAIN'
+      MINIO_URL: 'https://$MINIO_SERVICE_DOMAIN'
       MINIO_PORT: '443'
       MINIO_USESSL: 'true'
-      MINIO_BUCKET: 'demo'
+      MINIO_BUCKET: '$MINIO_BUCKET'
       PROBE_LOGGER: "false"
-      NODE_EXTRA_CA_CERTS: '/etc/ssl/certs/demo.pem'
+      NODE_EXTRA_CA_CERTS: '/etc/ssl/certs/$CA_BASENAME.pem'
     depends_on:
       - mongo
     restart: always
     networks:
       - cypress_frontend_network
     volumes:
-      - /etc/ssl/certs/demo.pem:/etc/ssl/certs/demo.pem
-      - /usr/local/share/ca-certificates/demo.crt:/usr/local/share/ca-certificates/demo.crt
+      - /etc/ssl/certs/$CA_BASENAME.pem:/etc/ssl/certs/$CA_BASENAME.pem
+      - /usr/local/share/ca-certificates/$CA_BASENAME.crt:/usr/local/share/ca-certificates/$CA_BASENAME.crt
     
   api:
     image: agoldis/sorry-cypress-api:2.5.11
     environment:
-      MONGODB_URI: 'mongodb://mongo:mongopwd@mongo:27017'
-      MONGODB_DATABASE: 'sorry-cypress'
+      MONGODB_URI: 'mongodb://$MONGO_INITDB_ROOT_USERNAME:$MONGO_INITDB_ROOT_PASSWORD@mongo:27017'
+      MONGODB_DATABASE: '$MONGODB_DATABASE'
       APOLLO_PLAYGROUND: 'false'
     depends_on:
       - mongo
@@ -79,13 +79,13 @@ services:
       - "443:443"
     restart: always
     volumes:
-      - ~/cypress-service/dashboard-cypress.crt:/etc/ssl/certs/dashboard-cypress.crt
-      - ~/cypress-service/dashboard-cypress.key:/etc/ssl/private/dashboard-cypress.key
-      - ~/cypress-service/director-cypress.crt:/etc/ssl/certs/director-cypress.crt
-      - ~/cypress-service/director-cypress.key:/etc/ssl/private/director-cypress.key
-      - ~/cypress-service/demo.crt:/usr/local/share/ca-certificates/demo.crt
-      - ~/cypress-service/demo.crt:/etc/ssl/certs/demo.crt
-      - ~/cypress-service/demo.pem:/etc/ssl/certs/demo.pem
+      - ~/cypress-service/$DASHBOARD_CRT:/etc/ssl/certs/$DASHBOARD_CRT
+      - ~/cypress-service/$DASHBOARD_KEY:/etc/ssl/private/$DASHBOARD_KEY
+      - ~/cypress-service/$DIRECTOR_CRT:/etc/ssl/certs/$DIRECTOR_CRT
+      - ~/cypress-service/$DIRECTOR_KEY:/etc/ssl/private/$DIRECTOR_KEY
+      - ~/cypress-service/$CA_BASENAME.crt:/usr/local/share/ca-certificates/$CA_BASENAME.crt
+      - ~/cypress-service/$CA_BASENAME.crt:/etc/ssl/certs/$CA_BASENAME.crt
+      - ~/cypress-service/$CA_BASENAME.pem:/etc/ssl/certs/$CA_BASENAME.pem
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - mongo

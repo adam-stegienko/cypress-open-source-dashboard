@@ -13,9 +13,9 @@ http {
   }
 
   server {
-    server_name          records.local;
+    server_name          $RECORDS_SERVICE_DOMAIN;
 
-    if ($host != "records.local") {
+    if ($host != "$RECORDS_SERVICE_DOMAIN") {
       return 404;
     }
 
@@ -34,8 +34,8 @@ http {
     }
 
     listen 443 ssl;
-    ssl_certificate /etc/ssl/certs/records-cypress.crt;
-    ssl_certificate_key /etc/ssl/private/records-cypress.key;
+    ssl_certificate /etc/ssl/certs/$RECORDS_CRT;
+    ssl_certificate_key /etc/ssl/private/$RECORDS_KEY;
     ssl_protocols TLSv1.2 TLSv1.3;
     client_max_body_size 128M;
 
@@ -43,20 +43,20 @@ http {
 
   server {
 
-    if ($host = "records.local") {
+    if ($host = "$RECORDS_SERVICE_DOMAIN") {
         return 301 https://$host$request_uri;
     }
 
-    server_name            records.local;
+    server_name            $RECORDS_SERVICE_DOMAIN;
     listen 80;
     return 404;
 
   }
 
   server {
-    server_name minio.local;
+    server_name $MINIO_SERVICE_DOMAIN;
 
-    if ($host != "minio.local") {
+    if ($host != "$MINIO_SERVICE_DOMAIN") {
       return 404;
     }
 
@@ -75,8 +75,8 @@ http {
     }
 
     listen 443 ssl;
-    ssl_certificate /etc/ssl/certs/minio-cypress.crt;
-    ssl_certificate_key /etc/ssl/private/minio-cypress.key;
+    ssl_certificate /etc/ssl/certs/$MINIO_CRT;
+    ssl_certificate_key /etc/ssl/private/$MINIO_KEY;
     ssl_protocols TLSv1.2 TLSv1.3;
     client_max_body_size 128M;
 
@@ -84,11 +84,11 @@ http {
 
   server {
 
-    if ($host = "minio.local") {
+    if ($host = "$MINIO_SERVICE_DOMAIN") {
         return 301 https://$host$request_uri;
     }
 
-    server_name            minio.local;
+    server_name            $MINIO_SERVICE_DOMAIN;
     listen 80;
     return 404;
 

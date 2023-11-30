@@ -1,5 +1,9 @@
-cypress-service/data
-*crt
-*key
-*csr
-*pem
+.env
+**/data
+**crt
+**key
+**csr
+**pem
+**/docker-compose.yaml
+**/nginx.conf
+**/etc-hosts.file
