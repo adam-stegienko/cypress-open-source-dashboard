@@ -139,18 +139,18 @@ mv $RECORDS_CRT minio-service/$RECORDS_CRT
 mv $RECORDS_KEY minio-service/$RECORDS_KEY
 
 # create /etc/hosts entries from etc.hosts.template
-envsubst < etc-hosts.template > etc-hosts.file
+envsubst < templates/etc-hosts.template > etc-hosts.file
 
 cp etc-hosts.file cypress-service/etc-hosts.file
 cp etc-hosts.file minio-service/etc-hosts.file
 
 # Create docker-compose files from templates
-envsubst < cypress.docker-compose.template > cypress-service/docker-compose.yaml
-envsubst < minio.docker-compose.template > minio-service/docker-compose.yaml
+envsubst < templates/cypress.docker-compose.template > cypress-service/docker-compose.yaml
+envsubst < templates/minio.docker-compose.template > minio-service/docker-compose.yaml
 
 # Create nginx conf files from templates
-envsubst '${DASHBOARD_CRT},${DASHBOARD_KEY},${DASHBOARD_SERVICE_DOMAIN},${DIRECTOR_CRT},${DIRECTOR_KEY},${DIRECTOR_SERVICE_DOMAIN}' < cypress.nginx.template > cypress-service/nginx.conf
-envsubst '${MINIO_CRT},${MINIO_KEY},${MINIO_SERVICE_DOMAIN},${RECORDS_CRT},${RECORDS_KEY},${RECORDS_SERVICE_DOMAIN}' < minio.nginx.template > minio-service/nginx.conf
+envsubst '${DASHBOARD_CRT},${DASHBOARD_KEY},${DASHBOARD_SERVICE_DOMAIN},${DIRECTOR_CRT},${DIRECTOR_KEY},${DIRECTOR_SERVICE_DOMAIN}' < templates/cypress.nginx.template > cypress-service/nginx.conf
+envsubst '${MINIO_CRT},${MINIO_KEY},${MINIO_SERVICE_DOMAIN},${RECORDS_CRT},${RECORDS_KEY},${RECORDS_SERVICE_DOMAIN}' < templates/minio.nginx.template > minio-service/nginx.conf
 
 if [ $? -eq 0 ]; then
     echo -e "\nOpen source Cypress project initialized successfully!\n"
