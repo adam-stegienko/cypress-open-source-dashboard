@@ -9,7 +9,7 @@ export default defineConfig({
       mochaFile: 'results/cypress-results-[hash].xml',
       toConsole: true,
     },
-    baseUrl: process.env.BASE_URL,
+    baseUrl: '<js-project-base-url>',
     video: true,
     videoCompression: 32,
     screenshotOnRunFailure: true,
